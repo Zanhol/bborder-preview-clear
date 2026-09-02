@@ -1,0 +1,26 @@
+# 依赖与构建产物
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/unpackage/
+*.log
+
+# 运行时数据（本地库/上传，不入库）
+data/
+uploads/
+backend/uploads/
+
+# 本地环境/密钥
+docker/.env
+.env
+*.local
+
+# 本地工具配置
+.reasonix/
+reasonix.toml
+.idea/
+.vscode/
+Thumbs.db
+
+# 微信开发者工具私有配置
+project.private.config.json

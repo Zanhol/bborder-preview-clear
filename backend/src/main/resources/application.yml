@@ -1,0 +1,46 @@
+server:
+  port: 8088
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3308/family_meal?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true}
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/init.sql
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:family-meal-dev-secret-key-change-in-production}
+    expiration: 86400000
+  upload:
+    path: ./uploads
+  wechat:
+    # 微信小程序凭据：docker 模式由 docker/.env 注入；宿主模式由 start-backend.ps1 加载
+    app-id: ${WECHAT_APPID:}
+    secret: ${WECHAT_SECRET:}
+    template-id: ${WECHAT_TEMPLATE_ID:}
+    miniprogram-state: trial
+  admin:
+    # 重置身份绑定管理密钥 / 管理后台口令；未配置则对应接口禁用
+    reset-key: ${ADMIN_RESET_KEY:}
+    password: ${ADMIN_PASSWORD:}
+  demo:
+    # 纯净演示版：H5 免密登录 + seed/reset（管理后台需要）
+    enabled: ${DEMO_ENABLED:false}
+    key: demo

@@ -1,0 +1,38 @@
+/* 燕公主的食堂 v1.0.0 — 暖色调色彩系统 */
+
+/* 主色调 — 温暖柿色 */
+$primary: #E8805A;
+$primary-light: #FCEDE6;
+$primary-dark: #C96A45;
+
+/* 辅助色 — 叶绿 */
+$secondary: #6A8347;
+$secondary-light: #EDF3E6;
+
+/* 背景系统 — 无纯白 */
+$bg-page: #FAF7F2;
+$bg-card: #FDF5EF;
+$bg-surface: #FFF8F0;
+$bg-input: #F5EFE8;
+
+/* 文字系统 — 无纯黑 */
+$text-primary: #4E3D35;
+$text-secondary: #8B7355;
+$text-hint: #BFAB98;
+
+/* 功能色 */
+$success: #6A8347;
+$warning: #E8A850;
+$error: #D4756B;
+
+/* 圆角 */
+$radius-sm: 8rpx;
+$radius-md: 14rpx;
+$radius-lg: 20rpx;
+$radius-round: 40rpx;
+
+/* uni-app 必需变量 */
+$uni-color-primary: #E8805A;
+$uni-color-success: #6A8347;
+$uni-color-warning: #E8A850;
+$uni-color-error: #D4756B;

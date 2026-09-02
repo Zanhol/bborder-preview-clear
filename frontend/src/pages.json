@@ -1,0 +1,92 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "bb点单",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/husband/menu",
+      "style": {
+        "navigationBarTitleText": "菜单",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/husband/mine",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/wife/dishes",
+      "style": {
+        "navigationBarTitleText": "菜品管理",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/wife/orders",
+      "style": {
+        "navigationBarTitleText": "订单",
+        "enablePullDownRefresh": true
+      }
+    }
+    /* #ifdef H5 */
+    ,{
+      "path": "pages/admin/login",
+      "style": {
+        "navigationBarTitleText": "管理后台登录"
+      }
+    },
+    {
+      "path": "pages/admin/users",
+      "style": {
+        "navigationBarTitleText": "用户与身份管理"
+      }
+    }
+    /* #endif */
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "bb点单",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F5F5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF6B35",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/husband/menu",
+        "text": "菜单"
+      },
+      {
+        "pagePath": "pages/husband/mine",
+        "text": "我的"
+      }
+    ]
+  },
+  "condition": {
+    "current": 0,
+    "list": [
+      {
+        "name": "登录页",
+        "path": "pages/login/login"
+      },
+      {
+        "name": "点餐端-菜单",
+        "path": "pages/husband/menu"
+      },
+      {
+        "name": "订单端-菜品管理",
+        "path": "pages/wife/dishes"
+      }
+    ]
+  }
+}

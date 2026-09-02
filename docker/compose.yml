@@ -1,0 +1,63 @@
+# bborder-preview full-stack compose: mysql + backend (docker)
+# First run: MySQL is created empty; backend auto-applies schema+seed
+#   (src/main/resources/db/init.sql via spring.sql.init) on its first boot.
+# Local access:
+#   - backend API:  http://localhost:8088
+#   - MySQL:        localhost:3318 (db user root, password per docker/.env; empty if MYSQL_PASSWORD unset)
+# Copy docker/.env.example -> docker/.env and fill real JWT_SECRET / WECHAT_*.
+name: bbopen-preview
+
+services:
+  mysql:
+    image: mysql:8.4.6
+    container_name: bbopen-preview-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: family_meal
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_HOST_PORT:-3318}:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_PASSWORD:-}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - appnet
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker/backend.Dockerfile
+    image: bbopen-preview-backend:latest
+    container_name: bbopen-preview-backend
+    restart: on-failure
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/family_meal?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in docker/.env}
+      DEMO_ENABLED: ${DEMO_ENABLED:-false}
+      WECHAT_APPID: ${WECHAT_APPID:-}
+      WECHAT_SECRET: ${WECHAT_SECRET:-}
+      WECHAT_TEMPLATE_ID: ${WECHAT_TEMPLATE_ID:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_RESET_KEY: ${ADMIN_RESET_KEY:-}
+      TZ: Asia/Shanghai
+    ports:
+      - "8088:8088"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - appnet
+
+volumes:
+  dbdata:
+
+networks:
+  appnet:
+    name: bbopen-preview-network
