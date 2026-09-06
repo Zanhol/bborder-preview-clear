@@ -95,3 +95,11 @@ docker compose -f docker/compose.yml up -d --build
 Copyright © 2026 深圳市甜梦屋科技有限公司（Shenzhen Tianmengwu Technology Co., Ltd.）
 
 本项目按 **Apache License 2.0** 开源，详见 [`LICENSE`](./LICENSE)。源码仅供学习与合规使用，使用时须保留本版权声明。
+
+## 发布计划
+
+- **预览版**：本月开源（当前仓库）
+- **regular（标准版）**：预计本月开放测试使用
+- **pro 版**：尚在开发中
+- **前 20 名进群**可享免费部署（需自备主机或服务器，可帮忙配置）
+- **regular / pro 版**将于 10 月和大家见面并小偿开售，目前正在基于开发成本和项目成本核算中
