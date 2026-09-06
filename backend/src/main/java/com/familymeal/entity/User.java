@@ -13,6 +13,7 @@ public class User {
     private String role;
     private String nickname;
     private String avatarUrl;
+    private String backgroundUrl;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 }

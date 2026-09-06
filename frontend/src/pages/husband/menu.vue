@@ -10,10 +10,9 @@
       <view class="nav-logout" @click="handleLogout">退出</view>
     </view>
 
-    <!-- 今日做饭人提示 -->
-    <view class="cook-banner">
-      <text class="cook-banner-icon">🍳</text>
-      <text class="cook-banner-text">今天 {{ authStore.cookLabel }} 做饭 · 菜单是{{ authStore.cookLabel }}的拿手菜</text>
+    <!-- 做饭状态 -->
+    <view class="cook-status-banner" :class="cookStatus">
+      <text>{{ cookStatus === 'done' ? '🍽️ 饭好啦，快来吃饭！' : '👩‍🍳 老婆做饭中...' }}</text>
     </view>
 
     <!-- 搜索栏 -->
@@ -97,7 +96,7 @@
     <view class="empty-state" v-else-if="!loading && !searchText">
       <view class="empty-illustration">🍳</view>
       <text class="empty-title">还没有菜品</text>
-      <text class="empty-desc">催{{ authStore.cookLabel }}赶紧上传几道菜~</text>
+      <text class="empty-desc">催老婆赶紧上传几道菜~</text>
     </view>
 
     <view class="empty-state" v-else>
@@ -127,6 +126,7 @@ import { onPullDownRefresh, onReachBottom as uniOnReachBottom } from '@dcloudio/
 import { useCartStore } from '@/store/cart'
 import { getDishes, getCategories } from '@/api/dish'
 import { useAuthStore } from '@/store/auth'
+import { getCurrentCook } from '@/api/cook'
 import { dishImg, dishImgFull } from '@/utils/image'
 import badgeDemo from '@/components/badge-demo.vue'
 import { DEFAULT_BACKGROUND, BG_IMAGE_URL } from '@/config'
@@ -201,7 +201,7 @@ const loadDishes = async () => {
   reloadSeq.value++   // 使在途 loadMore 的响应失效
   loading.value = true
   try {
-    const data = await getDishes(1, pageSize, authStore.cookWho)
+    const data = await getDishes(1, pageSize)
     dishes.value = (data && data.items) ? data.items : []
     total.value = (data && data.total) ? Number(data.total) : dishes.value.length
     page.value = 1
@@ -220,7 +220,7 @@ const loadMore = async () => {
   const seq = reloadSeq.value   // 记录调用时的版本
   try {
     const next = page.value + 1
-    const data = await getDishes(next, pageSize, authStore.cookWho)
+    const data = await getDishes(next, pageSize)
     const items = (data && data.items) ? data.items : []
     if (seq !== reloadSeq.value) return   // 期间列表被重载，丢弃本次结果
     dishes.value = dishes.value.concat(items)
@@ -250,6 +250,14 @@ const goOrders = () => {
   uni.reLaunch({ url: '/pages/husband/mine' })
 }
 
+const cookStatus = ref('cooking')
+const loadCookStatus = async () => {
+  try {
+    const c = await getCurrentCook()
+    cookStatus.value = c.cookStatus || 'cooking'
+  } catch (e) { /* 静默 */ }
+}
+
 const handleLogout = () => {
   authStore.logout()
 }
@@ -258,6 +266,7 @@ onMounted(async () => {
   await loadCategories()
   if (cats.value.length) activeCat.value = cats.value[0].catKey
   loadDishes()
+  loadCookStatus()
 })
 
 onPullDownRefresh(async () => {
@@ -327,28 +336,11 @@ onPullDownRefresh(async () => {
   color: #BFAB98;
   padding: 8rpx 16rpx;
 }
+.cook-status-banner { margin: 0 30rpx 16rpx; padding: 18rpx 24rpx; border-radius: 16rpx; font-size: 26rpx; font-weight: 600; background: #EDF3E6; color: #6A8347; }
+.cook-status-banner.done { background: #FFF1E6; color: #E8805A; }
 
 .search-bar {
   padding: 16rpx 30rpx 24rpx;
-}
-
-/* 今日做饭人提示条 */
-.cook-banner {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin: 0 30rpx 16rpx;
-  background: linear-gradient(135deg, #E8805A, #EC9A7A);
-  border-radius: 16rpx;
-  padding: 18rpx 24rpx;
-}
-
-.cook-banner-icon { font-size: 32rpx; flex-shrink: 0; }
-
-.cook-banner-text {
-  font-size: 26rpx;
-  color: #fff;
-  font-weight: 500;
 }
 
 .search-box {

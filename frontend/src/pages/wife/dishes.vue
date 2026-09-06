@@ -9,10 +9,11 @@
       <view class="nav-logout" @click="handleLogout">退出</view>
     </view>
 
-    <!-- 今日做饭人提示 -->
-    <view class="cook-banner">
-      <text class="cook-banner-icon">👩‍🍳</text>
-      <text class="cook-banner-text">今天是你做饭 · 菜品库在这里管理，对方看你的拿手菜</text>
+    <!-- 做饭状态 -->
+    <view class="cook-status-bar">
+      <text class="cook-status-icon">{{ cookStatus === 'done' ? '🍽️' : '👩‍🍳' }}</text>
+      <text class="cook-status-text">{{ cookStatus === 'done' ? '饭做好啦' : '做饭中...' }}</text>
+      <view class="cook-status-btn" @click="toggleCookStatus">{{ cookStatus === 'done' ? '重新做饭' : '做完饭了' }}</view>
     </view>
 
     <button class="fab-btn" @click="openAddForm">+</button>
@@ -41,13 +42,6 @@
           <view class="subcat-row">
             <view v-for="s in currentSubs" :key="s.value" class="subcat-tag" :class="{ active: form.subcategory === (s.value === '全部' ? '' : s.value) }"
               @click="form.subcategory = (s.value === '全部' ? '' : s.value)">{{ s.label }}</view>
-          </view>
-        </view>
-        <view class="form-group">
-          <text class="form-label">归属菜单（对方看谁的菜单）</text>
-          <view class="cat-row">
-            <view class="cat-tag" :class="{ active: form.owner === 'own' }" @click="form.owner = 'own'">👤 我的拿手菜</view>
-            <view class="cat-tag" :class="{ active: form.owner === 'both' }" @click="form.owner = 'both'">👫 公用菜单</view>
           </view>
         </view>
         <view class="form-group">
@@ -107,7 +101,6 @@
         <view class="dish-body">
           <text class="dish-name">{{ dish.name }}</text>
           <view class="dish-tags-row">
-            <view class="owner-badge" :class="'owner-' + dish.owner">{{ ownerLabel(dish.owner) }}</view>
             <view class="spice-badge" :class="spiceClass(dish.spiciness)">{{ spiceLabel(dish.spiciness) }}</view>
           </view>
           <text class="dish-desc" v-if="dish.description">{{ dish.description }}</text>
@@ -140,6 +133,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onPullDownRefresh, onReachBottom as uniOnReachBottom } from '@dcloudio/uni-app'
 import { getDishes, addDish, updateDish, deleteDish, getCategories } from '@/api/dish'
 import { useAuthStore } from '@/store/auth'
+import { getCurrentCook, setCookStatus } from '@/api/cook'
 import { dishImg } from '@/utils/image'
 import badgeDemo from '@/components/badge-demo.vue'
 import { DEFAULT_BACKGROUND, BG_IMAGE_URL } from '@/config'
@@ -199,6 +193,24 @@ const filteredDishList = computed(() => {
   )
 })
 
+const cookStatus = ref('cooking')
+const loadCookStatus = async () => {
+  try {
+    const c = await getCurrentCook()
+    cookStatus.value = c.cookStatus || 'cooking'
+  } catch (e) { /* 静默 */ }
+}
+const toggleCookStatus = async () => {
+  const next = cookStatus.value === 'done' ? 'cooking' : 'done'
+  try {
+    await setCookStatus(next)
+    cookStatus.value = next
+    uni.showToast({ title: next === 'done' ? '已通知老公开饭' : '继续做饭', icon: 'success' })
+  } catch (e) {
+    uni.showToast({ title: '操作失败: ' + (e.message || ''), icon: 'none' })
+  }
+}
+
 const goOrders = () => uni.reLaunch({ url: '/pages/wife/orders' })
 const handleLogout = () => authStore.logout()
 
@@ -237,11 +249,11 @@ const loadMore = async () => {
 const showForm = ref(false)
 const submitting = ref(false)
 const editingDish = ref(null)
-const form = ref({ name: '', description: '', spiciness: 'none', category: 'cooking', subcategory: '', owner: 'own', imagePreview: '', imageFile: null })
+const form = ref({ name: '', description: '', spiciness: 'none', category: 'cooking', subcategory: '', imagePreview: '', imageFile: null })
 
 const openAddForm = () => {
   editingDish.value = null
-  form.value = { name: '', description: '', spiciness: 'none', category: 'cooking', subcategory: '', owner: 'own', imagePreview: '', imageFile: null }
+  form.value = { name: '', description: '', spiciness: 'none', category: 'cooking', subcategory: '', imagePreview: '', imageFile: null }
   showForm.value = true
 }
 
@@ -251,17 +263,9 @@ const openEditForm = (dish) => {
     name: dish.name, description: dish.description || '',
     spiciness: dish.spiciness || 'none', category: dish.category || 'cooking',
     subcategory: dish.subcategory || '',
-    owner: dish.owner === 'both' ? 'both' : 'own',
     imagePreview: dish.imagePath ? '/api/dishes/' + dish.id + '/image' : '', imageFile: null
   }
   showForm.value = true
-}
-
-// 归属标签：husband/wife/both
-const ownerLabel = (o) => {
-  if (o === 'both') return '公用'
-  if (o === 'husband') return '老公的菜'
-  return '老婆的菜'
 }
 
 const cancelForm = () => { showForm.value = false; editingDish.value = null }
@@ -292,8 +296,8 @@ const submitForm = async () => {
   if (!form.value.name.trim()) return
   submitting.value = true
   try {
-    // 'own' → 自己的角色归属；'both' → 公用菜单
-    const owner = form.value.owner === 'both' ? 'both' : (authStore.user?.role || 'wife')
+    // 提交归属固定取当前登录角色（老婆上传=老婆的菜），后端兼容旧字段
+    const owner = authStore.user?.role || 'wife'
     if (editingDish.value) {
       await updateDish(editingDish.value.id, form.value.name.trim(), form.value.description.trim(), form.value.spiciness, form.value.category, form.value.subcategory, owner, form.value.imageFile)
       uni.showToast({ title: '已更新', icon: 'success' })
@@ -332,6 +336,7 @@ onMounted(async () => {
   await loadCategories()
   if (cats.value.length) dishCat.value = cats.value[0].catKey
   loadDishes()
+  loadCookStatus()
 })
 onPullDownRefresh(async () => { await loadDishes(); uni.stopPullDownRefresh() })
 uniOnReachBottom(() => { loadMore() })
@@ -340,19 +345,11 @@ uniOnReachBottom(() => { loadMore() })
 <style scoped>
 .dishes-page { padding: 20rpx 30rpx 120rpx; min-height: 100vh; background: #FAF7F2; }
 .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 0 24rpx; }
-
-/* 今日做饭人提示条 */
-.cook-banner {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 16rpx;
-  background: linear-gradient(135deg, #6A8347, #7D9A5A);
-  border-radius: 16rpx;
-  padding: 18rpx 24rpx;
-}
-.cook-banner-icon { font-size: 32rpx; flex-shrink: 0; }
-.cook-banner-text { font-size: 26rpx; color: #fff; font-weight: 500; }
+.cook-status-bar { display: flex; align-items: center; gap: 12rpx; margin-bottom: 16rpx; background: #FDF5EF; border: 2rpx solid #F0E2D2; border-radius: 16rpx; padding: 18rpx 24rpx; }
+.cook-status-icon { font-size: 32rpx; }
+.cook-status-text { flex: 1; font-size: 26rpx; font-weight: 600; color: #4E3D35; }
+.cook-status-btn { font-size: 24rpx; color: #fff; background: #E8805A; padding: 10rpx 24rpx; border-radius: 24rpx; font-weight: 600; }
+.cook-status-btn:active { opacity: .85; }
 .nav-tabs { display: flex; background: #F5EFE8; border-radius: 20rpx; padding: 4rpx; }
 .nav-tab { padding: 14rpx 32rpx; font-size: 26rpx; color: #BFAB98; border-radius: 18rpx; font-weight: 500; }
 .nav-tab.active { background: #FDF5EF; color: #4E3D35; font-weight: 700; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06); }
@@ -406,10 +403,6 @@ uniOnReachBottom(() => { loadMore() })
 .dish-body { flex: 1; margin-left: 18rpx; overflow: hidden; }
 .dish-name { font-size: 30rpx; font-weight: 700; color: #4E3D35; display: block; margin-bottom: 4rpx; }
 .dish-tags-row { display: flex; gap: 10rpx; align-items: center; margin-bottom: 4rpx; flex-wrap: wrap; }
-.owner-badge { font-size: 20rpx; padding: 4rpx 14rpx; border-radius: 12rpx; font-weight: 500; }
-.owner-badge.owner-both { background: #F0EAF8; color: #7A5AA8; }
-.owner-badge.owner-husband { background: #E8F0FA; color: #4A7BA6; }
-.owner-badge.owner-wife { background: #FAE8E0; color: #C0705A; }
 .dish-desc { font-size: 24rpx; color: #8B7355; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .dish-tags { margin-right: 12rpx; }
 .spice-badge { font-size: 20rpx; padding: 4rpx 14rpx; border-radius: 12rpx; font-weight: 500; }

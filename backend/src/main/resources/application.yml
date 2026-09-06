@@ -14,6 +14,7 @@ spring:
   sql:
     init:
       mode: always
+      encoding: UTF-8
       schema-locations: classpath:db/init.sql
 
 mybatis-plus:
@@ -35,6 +36,7 @@ app:
     app-id: ${WECHAT_APPID:}
     secret: ${WECHAT_SECRET:}
     template-id: ${WECHAT_TEMPLATE_ID:}
+    template-cook-done-id: ${WECHAT_TEMPLATE_COOK_DONE_ID:}
     miniprogram-state: trial
   admin:
     # 重置身份绑定管理密钥 / 管理后台口令；未配置则对应接口禁用

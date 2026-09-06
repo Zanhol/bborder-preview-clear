@@ -17,10 +17,12 @@ public class CookController {
         this.cookService = cookService;
     }
 
-    /** 当前今日做饭人（无需登录，登录页需要展示） */
+    /** 当前今日做饭人 + 做饭状态（无需登录，登录页/菜单页需要展示） */
     @GetMapping("/current")
     public ResponseEntity<?> current() {
-        return ResponseEntity.ok(Map.of("cookWho", cookService.getCookWho()));
+        return ResponseEntity.ok(Map.of(
+                "cookWho", cookService.getCookWho(),
+                "cookStatus", cookService.getCookStatus()));
     }
 
     /** 切换今日做饭人（需登录，登录后调用：登录即选做饭人） */
@@ -31,6 +33,23 @@ public class CookController {
             String who = body.get("who");
             Long userId = (Long) request.getAttribute("userId");
             return ResponseEntity.ok(cookService.switchCook(who, userId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** 更新做饭状态（cooking/done），仅今日做饭人可操作；done 时通知点餐端 */
+    @PostMapping("/status")
+    public ResponseEntity<?> updateStatus(@RequestBody Map<String, String> body,
+                                          HttpServletRequest request) {
+        try {
+            String status = body.get("status");
+            String role = (String) request.getAttribute("role");
+            if (!cookService.isCook(role)) {
+                return ResponseEntity.status(403).body(Map.of("error", "仅今日做饭人可操作"));
+            }
+            Long userId = (Long) request.getAttribute("userId");
+            return ResponseEntity.ok(cookService.updateCookStatus(status, userId));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

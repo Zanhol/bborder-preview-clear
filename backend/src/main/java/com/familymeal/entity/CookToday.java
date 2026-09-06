@@ -11,6 +11,8 @@ public class CookToday {
     private Long id;
     /** 今日做饭人：husband / wife */
     private String cookWho;
+    /** 做饭状态：cooking / done */
+    private String cookStatus;
     private LocalDateTime switchedAt;
     /** 切换者用户ID */
     private Long switchedBy;

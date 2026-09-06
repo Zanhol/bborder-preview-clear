@@ -15,9 +15,18 @@ INSERT IGNORE INTO users (id, role, nickname) VALUES (2, 'wife', '老婆');
 CREATE TABLE IF NOT EXISTS cook_today (
     id BIGINT PRIMARY KEY COMMENT '固定 1，单行记录',
     cook_who VARCHAR(16) NOT NULL DEFAULT 'wife' COMMENT '今日做饭人: husband/wife',
+    cook_status VARCHAR(16) NOT NULL DEFAULT 'cooking' COMMENT '做饭状态: cooking/done',
     switched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     switched_by BIGINT DEFAULT NULL COMMENT '切换者用户ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='今日做饭人（动态角色）';
+
+-- 迁移：旧表补 cook_status 列（幂等）
+SET @cs_exists := (SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME='cook_today' AND COLUMN_NAME='cook_status');
+SET @cs_ddl := IF(@cs_exists=0,
+  'ALTER TABLE cook_today ADD COLUMN cook_status VARCHAR(16) NOT NULL DEFAULT ''cooking'' COMMENT ''做饭状态: cooking/done''',
+  'SELECT 1');
+PREPARE cs_stmt FROM @cs_ddl; EXECUTE cs_stmt; DEALLOCATE PREPARE cs_stmt;
 
 -- 默认今日做饭人=老婆；切换后 INSERT IGNORE 不会覆盖已存在的行
 INSERT IGNORE INTO cook_today (id, cook_who) VALUES (1, 'wife');
@@ -98,8 +107,22 @@ CREATE TABLE IF NOT EXISTS subcategories (
     sub_key VARCHAR(32) NOT NULL DEFAULT '',
     label VARCHAR(64) NOT NULL,
     sort INT NOT NULL DEFAULT 0,
-    UNIQUE KEY uk_catkey_label (cat_key, label)
+    UNIQUE KEY uk_catkey_subkey (cat_key, sub_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 分类种子请在首次部署后执行一次 db/fix_categories.sql（含正确中文与 sub_key），
--- 不在此处 INSERT，避免 sql.init.mode=always 每次启动重复插入/编码错位。
+INSERT INTO categories (cat_key, label, sort) VALUES
+ ('cooking','买菜做饭',1),
+ ('delivery','懒人外卖',2)
+ON DUPLICATE KEY UPDATE label=VALUES(label), sort=VALUES(sort);
+
+INSERT INTO subcategories (cat_key, sub_key, label, sort) VALUES
+ ('cooking','','全部',0),
+ ('cooking','breakfast','早餐',1),
+ ('cooking','meat','肉类',2),
+ ('cooking','vegetable','蔬菜类',3),
+ ('cooking','seafood','海鲜类',4),
+ ('cooking','soup','汤品',5),
+ ('cooking','snack','小吃',6),
+ ('cooking','staple','主食',7),
+ ('cooking','drink','饮品',8)
+ON DUPLICATE KEY UPDATE label=VALUES(label), sort=VALUES(sort);

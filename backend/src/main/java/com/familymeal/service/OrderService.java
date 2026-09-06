@@ -116,10 +116,24 @@ public class OrderService {
     }
 
     public void markReceived(Long orderId) {
-        Order order = new Order();
-        order.setId(orderId);
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) throw new RuntimeException("订单不存在");
         order.setStatus("received");
         orderMapper.updateById(order);
+
+        // 微信通知下单人（点餐端）：老婆已收到订单
+        java.util.List<OrderItem> items = orderItemMapper.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OrderItem>()
+                        .eq(OrderItem::getOrderId, orderId));
+        StringBuilder names = new StringBuilder();
+        for (OrderItem it : items) {
+            if (names.length() > 0) names.append("、");
+            names.append(it.getDishName());
+        }
+        String timeText = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("MM月dd日 HH:mm"));
+        weChatService.sendReceivedNotify(order.getUserId(),
+                String.valueOf(order.getOrderNumber()), names.toString(), timeText);
     }
 
     @Transactional
