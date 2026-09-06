@@ -1,11 +1,10 @@
 # bborder-preview（bb点单预览版 · 开源版）
 
-> **多 agent 阅读**：全工作区 agent 共享；前先读 `E:\memory\README.md`、`E:\memory\统一规则.md` D 域、`E:\memory\02-B项目-bborder\bborder-归档档案.md`。
+夫妻档 bb 点单微信小程序「bb点单预览版」+ Spring Boot 后端。固定角色：老婆做饭（管菜品、接单、做饭状态推进），老公点菜（看菜单、下单、收通知）。
 
-夫妻档bb点单预览版微信小程序「bb点单预览版」+ Spring Boot 后端。固定角色：老婆做饭（管菜品、接单、做饭状态推进），老公点菜（看菜单、下单、收通知）。
-
-> small open-source (foss) counterpart of a private family-meal mini-program.
 > 本仓库为**干净开源版**：不含任何真实微信凭据、无真实用户 openid、无私有公网域名——相关项一律以占位符/环境变量注入。
+>
+> 📖 **不会部署？** 请直接看小白版完整指南：[`docs/部署清单.md`](./docs/部署清单.md)（从安装依赖到全流程跑通，含微信通知与真机联调详解）。
 
 ## 功能
 
@@ -55,12 +54,7 @@ docker compose -f docker/compose.yml up -d --build
 
 ## 本地非容器运行（可选）
 
-```bash
-# backend（需本机 MySQL 3308? 见 backend application.yml DB_URL 与 jar 打 标）
-cd backend && mvn spring-boot:run
-# frontend
-cd frontend && npm install && npm run dev:mp-weixin   # 微信开发者工具导入 dist/dev/mp-weixin
-```
+（略，见 [`docs/部署清单.md`](./docs/部署清单.md)）
 
 ## 微信小程序配置
 
@@ -89,6 +83,12 @@ cd frontend && npm install && npm run dev:mp-weixin   # 微信开发者工具导
 
 - 本项目按开源惯例剔除隐私：仓库不含任何真实 `openid`、微信 `appid/secret`、私有域名或本机路径。
 - 数据库 schema 由后端 `backend/src/main/resources/db/init.sql` 在首次启动自动建立；业务数据请自行备份。
+
+## 使用咨询
+
+如有不懂，欢迎扫码进开发群咨询：
+
+![开发群](./docs/contact-group.png)
 
 ## 版权
 
