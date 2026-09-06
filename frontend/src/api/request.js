@@ -1,3 +1,4 @@
+// Copyright 2026 深圳市甜梦屋科技有限公司 · Licensed under Apache-2.0
 const BASE_URL = 'https://YOUR_BACKEND_DOMAIN_OR_HOST'
 // 说明：小程序 `request` 需配置绝对 HTTPS 域名（微信「服务器域名」需合法备案域名）。
 // 本地联调可指向局域网 IP（勾选开发者工具「不校验合法域名」）。

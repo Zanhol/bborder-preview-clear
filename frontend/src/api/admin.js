@@ -1,3 +1,4 @@
+// Copyright 2026 深圳市甜梦屋科技有限公司 · Licensed under Apache-2.0
 // 管理后台专用请求封装（独立 token，与微信登录态隔离）
 const BASE_URL = 'https://YOUR_BACKEND_DOMAIN_OR_HOST'
 

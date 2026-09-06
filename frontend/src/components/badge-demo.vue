@@ -1,3 +1,4 @@
+<!-- Copyright 2026 深圳市甜梦屋科技有限公司 · Licensed under Apache-2.0 -->
 <template>
   <!-- 演示模式水印角标（P1-3）：防止把演示数据当真实交付 -->
   <view class="demo-watermark" v-if="show">演示数据</view>

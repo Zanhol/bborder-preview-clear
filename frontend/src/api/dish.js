@@ -1,3 +1,4 @@
+// Copyright 2026 深圳市甜梦屋科技有限公司 · Licensed under Apache-2.0
 import { get, del } from './request'
 
 const BASE = 'https://YOUR_BACKEND_DOMAIN_OR_HOST'

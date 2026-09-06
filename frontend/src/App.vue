@@ -1,3 +1,4 @@
+<!-- Copyright 2026 深圳市甜梦屋科技有限公司 · Licensed under Apache-2.0 -->
 <script setup>
 import { onLaunch } from '@dcloudio/uni-app'
 import { useAuthStore } from '@/store/auth'

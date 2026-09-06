@@ -89,3 +89,9 @@ cd frontend && npm install && npm run dev:mp-weixin   # 微信开发者工具导
 
 - 本项目按开源惯例剔除隐私：仓库不含任何真实 `openid`、微信 `appid/secret`、私有域名或本机路径。
 - 数据库 schema 由后端 `backend/src/main/resources/db/init.sql` 在首次启动自动建立；业务数据请自行备份。
+
+## 版权
+
+Copyright © 2026 深圳市甜梦屋科技有限公司（Shenzhen Tianmengwu Technology Co., Ltd.）
+
+本项目按 **Apache License 2.0** 开源，详见 [`LICENSE`](./LICENSE)。源码仅供学习与合规使用，使用时须保留本版权声明。
