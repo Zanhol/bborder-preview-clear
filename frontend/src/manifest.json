@@ -1,7 +1,7 @@
 {
-  "name": "家庭点餐",
+  "name": "bb点单预览版",
   "appid": "__UNI__FAMILYMEAL",
-  "description": "夫妻档家庭点餐系统 - 我点菜，你做饭",
+  "description": "夫妻档bb点单预览版系统 - 我点菜，你做饭",
   "versionName": "1.0.0",
   "versionCode": "100",
   "transformPx": false,
@@ -58,7 +58,7 @@
       "mode": "hash",
       "base": "/"
     },
-    "title": "家庭点餐",
+    "title": "bb点单预览版",
     "publicPath": "/",
     "devServer": {
       "port": 5173,

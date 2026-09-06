@@ -3,7 +3,7 @@
     {
       "path": "pages/login/login",
       "style": {
-        "navigationBarTitleText": "燕公主的食堂",
+        "navigationBarTitleText": "bb点单预览版",
         "navigationStyle": "custom"
       }
     },
@@ -52,7 +52,7 @@
   ],
   "globalStyle": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "燕公主的食堂",
+    "navigationBarTitleText": "bb点单预览版",
     "navigationBarBackgroundColor": "#FFFFFF",
     "backgroundColor": "#F5F5F5"
   },

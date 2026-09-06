@@ -1,8 +1,8 @@
-# bborder-preview（家庭点餐 · 开源版）
+# bborder-preview（bb点单预览版 · 开源版）
 
 > **多 agent 阅读**：全工作区 agent 共享；前先读 `E:\memory\README.md`、`E:\memory\统一规则.md` D 域、`E:\memory\02-B项目-bborder\bborder-归档档案.md`。
 
-夫妻档家庭点餐微信小程序「燕公主的食堂」+ Spring Boot 后端。固定角色：老婆做饭（管菜品、接单、做饭状态推进），老公点菜（看菜单、下单、收通知）。
+夫妻档bb点单预览版微信小程序「bb点单预览版」+ Spring Boot 后端。固定角色：老婆做饭（管菜品、接单、做饭状态推进），老公点菜（看菜单、下单、收通知）。
 
 > small open-source (foss) counterpart of a private family-meal mini-program.
 > 本仓库为**干净开源版**：不含任何真实微信凭据、无真实用户 openid、无私有公网域名——相关项一律以占位符/环境变量注入。

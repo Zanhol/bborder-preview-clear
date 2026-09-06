@@ -32,7 +32,7 @@
       </view>
     </view>
 
-    <text class="footer-text">燕公主的食堂 · © 2026 深圳市甜梦屋科技有限公司</text>
+    <text class="footer-text">bb点单预览版 · © 2026 深圳市甜梦屋科技有限公司</text>
   </view>
 </template>
 

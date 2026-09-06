@@ -1,7 +1,7 @@
 // Copyright 2026 深圳市甜梦屋科技有限公司 · Licensed under Apache-2.0
 // 白标参数化配置（P2-3）：改此处即可一键改店名 / 夫妻称呼 / 品牌色 / 默认背景。
 export const APP = {
-  name: '燕公主的食堂',
+  name: 'bb点单预览版',
   hostName: '老公',
   desc: '你点菜 · 我做饭',
   primary: '#E8805A'
