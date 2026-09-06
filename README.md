@@ -1,14 +1,17 @@
 # bborder-preview（家庭点餐 · 开源版）
 
-夫妻档日常「今天吃什么 / 谁做饭」微信小程序 + Spring Boot 后端。点菜、下单、记录今日掌勺人。
+> **多 agent 阅读**：全工作区 agent 共享；前先读 `E:\memory\README.md`、`E:\memory\统一规则.md` D 域、`E:\memory\02-B项目-bborder\bborder-归档档案.md`。
+
+夫妻档家庭点餐微信小程序「燕公主的食堂」+ Spring Boot 后端。固定角色：老婆做饭（管菜品、接单、做饭状态推进），老公点菜（看菜单、下单、收通知）。
 
 > small open-source (foss) counterpart of a private family-meal mini-program.
 > 本仓库为**干净开源版**：不含任何真实微信凭据、无真实用户 openid、无私有公网域名——相关项一律以占位符/环境变量注入。
 
 ## 功能
 
-- 双角色点餐（掌勺 vs 点菜），菜品按归属/分类/忌口标记
-- 今日菜单与掌勺人切换
+- 固定双角色：老婆=做饭端（管菜品、接订单、做饭状态推进），老公=点菜端（看菜单、下单、收通知）
+- 菜品管理：分类/子分类、辣度（不辣/男宝辣/女宝辣）、备注、拍照/选图裁剪
+- 双向微信订阅通知：老公下单→老婆；老婆「已收到」「做完饭」→老公
 - 微信登录（code2session）+ JWT
 - `DEMO_ENABLED=true` 时提供 H5 免密登录与演示数据重置（便于无微信凭据体验）
 
@@ -21,7 +24,7 @@
 ## 目录
 
 ```
-bborder-preview/
+bborder-preview-clear/
 ├── backend/   Spring Boot 后端（src/main/resources/db/init.sql 自建表+种子）
 ├── frontend/  uni-app 小程序源码（dist 由微信开发者工具编译预览）
 ├── docker/    compose.yml + .env.example + backend.Dockerfile
@@ -77,7 +80,9 @@ cd frontend && npm install && npm run dev:mp-weixin   # 微信开发者工具导
 | `MYSQL_PASSWORD` | MySQL root 密码；留空 = 容器空密码 |
 | `JWT_SECRET` | 后端签名密钥，**>=32 个 ASCII，必填** |
 | `DEMO_ENABLED` | `true`：H5 免密登录 + demo 数据（无微信凭据时体验用） |
-| `WECHAT_APPID/WECHAT_SECRET/WECHAT_TEMPLATE_ID` | 小程序微信登录/模板消息 |
+| `WECHAT_APPID/WECHAT_SECRET` | 小程序微信登录（code2session） |
+| `WECHAT_TEMPLATE_ID` | 订单通知模板（下单/已收到） |
+| `WECHAT_TEMPLATE_COOK_DONE_ID` | 订单完成通知模板（做完饭） |
 | `ADMIN_PASSWORD/ADMIN_RESET_KEY` | 管理后台口令 / 重置身份密钥（可留空禁用） |
 
 ## 说明与免责
