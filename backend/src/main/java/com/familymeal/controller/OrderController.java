@@ -62,9 +62,11 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id,
                                      HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
         String role = (String) request.getAttribute("role");
-        if (!cookService.isCook(role)) {
-            return ResponseEntity.status(403).body(Map.of("error", "仅今日做饭人可操作"));
+        // 任意状态可删：下单本人或今日做饭人
+        if (!orderService.isOwner(id, userId) && !cookService.isCook(role)) {
+            return ResponseEntity.status(403).body(Map.of("error", "仅下单人或今日做饭人可删除"));
         }
         orderService.delete(id);
         return ResponseEntity.ok(Map.of("success", true));

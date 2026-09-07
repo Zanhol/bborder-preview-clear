@@ -53,7 +53,6 @@
       <text class="empty-illustration">🛒</text>
       <text class="empty-title">购物车是空的</text>
       <text class="empty-desc">去菜单页选几个想吃的菜</text>
-      <button class="link-btn" @click="uni.reLaunch({ url: '/pages/husband/menu' })">← 返回菜单</button>
     </view>
 
     <!-- 订单记录 -->
@@ -77,8 +76,16 @@
             </text>
           </text>
         </view>
-        <text class="order-time">{{ formatTime(order.createdAt) }}</text>
+        <view class="order-foot">
+          <text class="order-time">{{ formatTime(order.createdAt) }}</text>
+          <text class="order-del" @click="handleDelete(order)">删除</text>
+        </view>
       </view>
+    </view>
+
+    <view class="legal">
+      <text class="icp-text">粤ICP备2026129595号-1</text>
+      <text class="copyright-text">开发主体及版权归属：深圳市甜梦屋科技有限公司</text>
     </view>
   </view>
 </template>
@@ -88,7 +95,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import { useCartStore } from '@/store/cart'
 import { useAuthStore } from '@/store/auth'
-import { createOrder, getOrders } from '@/api/order'
+import { createOrder, getOrders, deleteOrder } from '@/api/order'
 import { dishImgById } from '@/utils/image'
 import { DEFAULT_BACKGROUND, BG_IMAGE_URL } from '@/config'
 
@@ -122,6 +129,25 @@ const submitOrder = async () => {
   } finally {
     submitting.value = false
   }
+}
+
+const handleDelete = (order) => {
+  uni.showModal({
+    title: '删除订单',
+    content: `确定删除订单 No.${order.orderNumber || order.id} 吗？`,
+    confirmColor: '#D4756B',
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          await deleteOrder(order.id)
+          uni.showToast({ title: '已删除', icon: 'success' })
+          await loadOrders()
+        } catch (e) {
+          uni.showToast({ title: '删除失败', icon: 'none' })
+        }
+      }
+    }
+  })
 }
 
 const formatTime = (timeStr) => {
@@ -396,4 +422,27 @@ onPullDownRefresh(async () => {
   font-size: 22rpx;
   color: #BFAB98;
 }
+
+.order-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8rpx;
+}
+
+.order-del {
+  font-size: 24rpx;
+  color: #BFAB98;
+  padding: 4rpx 12rpx;
+  border: 1rpx solid #E8D5C4;
+  border-radius: 20rpx;
+}
+.order-del:active { background: #FCE8E6; color: #D4756B; border-color: #D4756B; }
+
+.legal {
+  text-align: center;
+  padding: 20rpx 0 30rpx;
+}
+.icp-text { font-size: 22rpx; color: #BFAB98; display: block; }
+.copyright-text { font-size: 22rpx; color: #BFAB98; display: block; margin-top: 6rpx; }
 </style>

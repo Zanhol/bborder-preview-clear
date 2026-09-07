@@ -48,48 +48,34 @@ export const useAuthStore = defineStore('auth', {
         // 拉取用户 DIY 背景
         this.refreshMe()
 
+        // 进端分流（订阅授权交给各端首页 onMounted 每次进端请求——微信一次性订阅）
         if (this.isWife) {
-          // 老婆（做饭端）：引导开启通知后再进菜品管理
-          uni.showModal({
-            title: '开启通知',
-            content: '对方下单后需要微信通知你\n点确定后请在弹窗中选"允许"',
-            success: (modalRes) => {
-              if (modalRes.confirm) {
-                wx.requestSubscribeMessage({
-                  tmplIds: ['YOUR_WECHAT_TEMPLATE_ID'],
-                  complete: () => {
-                    uni.setStorageSync('msg_subscribed', '1')
-                    uni.reLaunch({ url: '/pages/wife/dishes' })
-                  }
-                })
-              } else {
-                uni.reLaunch({ url: '/pages/wife/dishes' })
-              }
-            }
-          })
+          uni.reLaunch({ url: '/pages/wife/dishes' })
         } else {
-          // 老公（点餐端）：订阅「已收到订单」+「订单完成（饭好了）」两个通知
-          uni.showModal({
-            title: '开启通知',
-            content: '老婆收到订单、做完饭时微信通知你\n点确定后请在弹窗中选"允许"',
-            success: (modalRes) => {
-              if (modalRes.confirm) {
-                wx.requestSubscribeMessage({
-                  tmplIds: ['YOUR_WECHAT_TEMPLATE_ID', 'YOUR_WECHAT_COOK_DONE_TEMPLATE_ID'],
-                  complete: () => {
-                    uni.setStorageSync('msg_subscribed', '1')
-                    uni.reLaunch({ url: '/pages/husband/menu' })
-                  }
-                })
-              } else {
-                uni.reLaunch({ url: '/pages/husband/menu' })
-              }
-            }
-          })
+          uni.reLaunch({ url: '/pages/husband/menu' })
         }
       } catch (e) {
         uni.showToast({ title: '登录失败: ' + e.message, icon: 'none' })
       }
+    },
+
+    /**
+     * 每次进入点餐/做饭端请求订阅（微信订阅为一次性：允许一次=可收一条通知，多授权多收）
+     */
+    requestSubscribe() {
+      // #ifdef MP-WEIXIN
+      if (this.isWife) {
+        wx.requestSubscribeMessage({
+          tmplIds: ['YOUR_WECHAT_TEMPLATE_ID'],
+          complete: () => { uni.setStorageSync('msg_subscribed', '1') }
+        })
+      } else {
+        wx.requestSubscribeMessage({
+          tmplIds: ['YOUR_WECHAT_TEMPLATE_ID', 'YOUR_WECHAT_COOK_DONE_TEMPLATE_ID'],
+          complete: () => { uni.setStorageSync('msg_subscribed', '1') }
+        })
+      }
+      // #endif
     },
 
     /** 从本地恢复登录态，并异步刷新背景 */

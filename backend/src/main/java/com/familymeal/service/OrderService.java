@@ -141,10 +141,26 @@ public class OrderService {
                 String.valueOf(order.getOrderNumber()), names.toString(), timeText);
     }
 
+    /**
+     * 是否订单下单人本人（用于删除权限）
+     */
+    public boolean isOwner(Long orderId, Long userId) {
+        Order order = orderMapper.selectById(orderId);
+        return order != null && userId != null && userId.equals(order.getUserId());
+    }
+
     @Transactional
     public void delete(Long orderId) {
         orderItemMapper.delete(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OrderItem>()
                 .eq(OrderItem::getOrderId, orderId));
         orderMapper.deleteById(orderId);
+        // 删除后编号重新连续 1..n（按创建顺序 id 升序）
+        List<Order> rest = orderMapper.selectList(
+                new LambdaQueryWrapper<Order>().orderByAsc(Order::getId));
+        int i = 1;
+        for (Order o : rest) {
+            o.setOrderNumber(i++);
+            orderMapper.updateById(o);
+        }
     }
 }

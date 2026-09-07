@@ -126,6 +126,11 @@
       <text class="empty-title">没找到 "{{ searchText }}"</text>
       <text class="empty-desc">换个关键词试试</text>
     </view>
+
+    <view class="legal">
+      <text class="icp-text">粤ICP备2026129595号-1</text>
+      <text class="copyright-text">开发主体及版权归属：深圳市甜梦屋科技有限公司</text>
+    </view>
   </view>
 </template>
 
@@ -334,6 +339,7 @@ const spiceLabel = (s) => {
 }
 
 onMounted(async () => {
+  authStore.requestSubscribe()
   await loadCategories()
   if (cats.value.length) dishCat.value = cats.value[0].catKey
   loadDishes()
@@ -416,4 +422,8 @@ uniOnReachBottom(() => { loadMore() })
 .empty-icon { font-size: 100rpx; display: block; margin-bottom: 20rpx; }
 .empty-title { font-size: 30rpx; font-weight: 600; color: #8B7355; display: block; margin-bottom: 8rpx; }
 .empty-desc { font-size: 26rpx; color: #BFAB98; }
+
+.legal { text-align: center; padding: 20rpx 0 30rpx; }
+.icp-text { font-size: 22rpx; color: #BFAB98; display: block; }
+.copyright-text { font-size: 22rpx; color: #BFAB98; display: block; margin-top: 6rpx; }
 </style>

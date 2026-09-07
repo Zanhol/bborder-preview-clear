@@ -107,9 +107,9 @@
     </view>
 
     <!-- 底部浮条 -->
-    <view class="cart-float" v-if="cartStore.count > 0" @click="goToMine">
+    <view class="cart-float" v-if="cartStore.count > 0" @click="showCartPanel = true">
       <view class="cart-badge">{{ cartStore.count }}</view>
-      <text class="cart-label">去下单</text>
+      <text class="cart-label">购物车</text>
       <view class="cart-dishes">
         <text class="cart-dish-name" v-for="item in cartStore.items.slice(0, 3)" :key="item.dishId">
           {{ item.dishName }}
@@ -117,6 +117,42 @@
         <text class="cart-more" v-if="cartStore.items.length > 3">等</text>
       </view>
       <text class="cart-arrow">→</text>
+    </view>
+
+    <!-- 购物车浮层面板（就地预览/改口味/删除/下单，不再跳转） -->
+    <view class="cart-panel-mask" v-if="showCartPanel" @click="showCartPanel = false">
+      <view class="cart-panel" @click.stop>
+        <view class="panel-head">
+          <text class="panel-title">🛒 已选 {{ cartStore.count }} 道菜</text>
+          <text class="panel-clear" @click="cartStore.clear()">清空</text>
+        </view>
+        <scroll-view scroll-y class="panel-list">
+          <view class="panel-item" v-for="item in cartStore.items" :key="item.dishId">
+            <image class="panel-img" :src="dishImg({ id: item.dishId, imagePath: item.imagePath })" mode="aspectFill" />
+            <view class="panel-info">
+              <text class="panel-name">{{ item.dishName }}</text>
+              <view class="panel-spice" @click="changeSpice(item)">
+                <text>{{ item.spiciness === 'none' ? '不辣' : item.spiciness === 'male_baby' ? '🌶️ 男宝辣' : '🌶️🌶️ 女宝辣' }}</text>
+                <text class="panel-switch">点按改口味</text>
+              </view>
+            </view>
+            <view class="panel-del" @click="removeCartItem(item.dishId)">✕</view>
+          </view>
+          <view class="panel-empty" v-if="cartStore.items.length === 0">
+            <text>购物车已空 🛒</text>
+          </view>
+        </scroll-view>
+        <button class="panel-submit" @click="submitCart" :disabled="submitting || cartStore.items.length === 0">
+          <text v-if="submitting">提交中...</text>
+          <text v-else>确认下单 · 共 {{ cartStore.count }} 道</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 版权 -->
+    <view class="legal">
+      <text class="icp-text">粤ICP备2026129595号-1</text>
+      <text class="copyright-text">开发主体及版权归属：深圳市甜梦屋科技有限公司</text>
     </view>
   </view>
 </template>
@@ -126,6 +162,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onPullDownRefresh, onReachBottom as uniOnReachBottom } from '@dcloudio/uni-app'
 import { useCartStore } from '@/store/cart'
 import { getDishes, getCategories } from '@/api/dish'
+import { createOrder } from '@/api/order'
 import { useAuthStore } from '@/store/auth'
 import { getCurrentCook } from '@/api/cook'
 import { dishImg, dishImgFull } from '@/utils/image'
@@ -247,6 +284,30 @@ const goToMine = () => {
   uni.reLaunch({ url: '/pages/husband/mine' })
 }
 
+// 购物车浮层：改口味（点击循环）/删除/就地确认下单
+const showCartPanel = ref(false)
+const submitting = ref(false)
+const changeSpice = (item) => {
+  const order = ['none', 'male_baby', 'female_baby']
+  const idx = order.indexOf(item.spiciness)
+  item.spiciness = order[(idx + 1) % order.length]
+}
+const removeCartItem = (dishId) => cartStore.removeItem(dishId)
+const submitCart = async () => {
+  if (cartStore.items.length === 0) return
+  submitting.value = true
+  try {
+    await createOrder(cartStore.orderItems)
+    uni.showToast({ title: '下单成功，已通知做饭人 🍳', icon: 'success' })
+    cartStore.clear()
+    showCartPanel.value = false
+  } catch (e) {
+    uni.showToast({ title: (e && e.message) || '下单失败', icon: 'none' })
+  } finally {
+    submitting.value = false
+  }
+}
+
 const goOrders = () => {
   uni.reLaunch({ url: '/pages/husband/mine' })
 }
@@ -264,6 +325,7 @@ const handleLogout = () => {
 }
 
 onMounted(async () => {
+  authStore.requestSubscribe()
   await loadCategories()
   if (cats.value.length) activeCat.value = cats.value[0].catKey
   loadDishes()
@@ -610,4 +672,29 @@ onPullDownRefresh(async () => {
   flex-shrink: 0;
   margin-left: 8rpx;
 }
+
+/* 购物车浮层 */
+.cart-panel-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+.cart-panel { width: 100%; background: #FDF8F3; border-radius: 32rpx 32rpx 0 0; padding: 32rpx 30rpx 40rpx; box-sizing: border-box; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20rpx; }
+.panel-title { font-size: 32rpx; font-weight: 700; color: #4E3D35; }
+.panel-clear { font-size: 26rpx; color: #BFAB98; }
+.panel-list { max-height: 50vh; }
+.panel-item { display: flex; align-items: center; gap: 18rpx; padding: 16rpx 0; border-bottom: 1rpx solid #F0E2D2; }
+.panel-img { width: 96rpx; height: 96rpx; border-radius: 14rpx; background: #F5EFE8; flex-shrink: 0; }
+.panel-info { flex: 1; min-width: 0; }
+.panel-name { font-size: 28rpx; font-weight: 600; color: #4E3D35; display: block; }
+.panel-spice { display: flex; align-items: center; gap: 10rpx; margin-top: 6rpx; font-size: 24rpx; color: #D4756B; }
+.panel-switch { font-size: 20rpx; color: #BFAB98; background: #F5EFE8; padding: 2rpx 12rpx; border-radius: 10rpx; }
+.panel-del { width: 48rpx; height: 48rpx; line-height: 48rpx; text-align: center; font-size: 26rpx; color: #BFAB98; flex-shrink: 0; }
+.panel-del:active { background: #FCE8E6; color: #D4756B; }
+.panel-empty { text-align: center; color: #BFAB98; padding: 30rpx 0; font-size: 26rpx; }
+.panel-submit { width: 100%; height: 88rpx; line-height: 88rpx; background: linear-gradient(135deg, #E8805A, #EC9A7A); color: #fff; font-size: 32rpx; font-weight: 700; border-radius: 44rpx; border: none; margin-top: 24rpx; box-shadow: 0 6rpx 24rpx rgba(232,128,90,.25); }
+.panel-submit:active { transform: scale(.97); }
+.panel-submit[disabled] { background: #E8D5C4; box-shadow: none; }
+
+/* 版权 */
+.legal { text-align: center; padding: 20rpx 30rpx 30rpx; }
+.icp-text { font-size: 22rpx; color: #BFAB98; display: block; }
+.copyright-text { font-size: 22rpx; color: #BFAB98; display: block; margin-top: 6rpx; }
 </style>
